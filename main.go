@@ -11,7 +11,7 @@ import (
 func init()  {
     orm.RegisterDriver("sqlite", orm.DRSqlite)
     orm.RegisterDataBase("default", "sqlite3", "database/upgraderserver.db")
-	//orm.RunSyncdb("default", false, true)
+    orm.RunSyncdb("default", false, true)
 }
 
 
