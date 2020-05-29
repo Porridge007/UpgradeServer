@@ -14,6 +14,7 @@ type Package struct {
 	Name    string `orm:"size(128)"`
 	Address string `orm:"size(128)"`
 	Device  string `orm:"size(128)"`
+	Version string `orm:"size(128)"`
 }
 
 func init() {

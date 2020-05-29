@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"UpgraderServer/models"
-	"encoding/json"
 	"errors"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
+	"log"
 	"strconv"
 	"strings"
-
-	"github.com/astaxie/beego"
 )
 
 //  PackageController operations for Package
@@ -18,27 +18,62 @@ type PackageController struct {
 // URLMapping ...
 func (c *PackageController) URLMapping() {
 	c.Mapping("Post", c.Post)
-	c.Mapping("GetOne", c.GetOne)
+	//c.Mapping("GetOne", c.GetOne)
 	c.Mapping("GetAll", c.GetAll)
-	c.Mapping("Put", c.Put)
+	//c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
 }
 
 // Post ...
 // @Title Post
 // @Description create Package
-// @Param	body		body 	models.Package	true		"body for Package content"
+// @Param   device   query   string  false       "device belongs to"
 // @Success 201 {int} models.Package
 // @Failure 403 body is empty
 // @router / [post]
 func (c *PackageController) Post() {
 	var v models.Package
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+	deviceId, _ :=  c.GetInt64("device")
+	var  device models.Device
+	_ =  orm.NewOrm().QueryTable("device").Filter("id", deviceId).One(&device)
+	v.Device = device.Device
+
+	f, h, err := c.GetFile("file")
+	if err != nil {
+		log.Fatal("getfile err ", err)
+	}
+	defer f.Close()
+	path :=  "upload/"+ h.Filename
+
+	err = c.SaveToFile("file", path)
+	if  err != nil{
+		ret := models.Resp{
+			Code: 401,
+			Msg:  "Save Package Failure",
+			Data: err.Error(),
+		}
+		c.Data["json"] =  ret
+		c.ServeJSON()
+		return
+	}
+	v.Name = h.Filename
+	v.Version = getVersion(v.Name)
+	v.Address =path
 	if _, err := models.AddPackage(&v); err == nil {
 		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+		ret := models.Resp{
+			Code: 200,
+			Msg:  "Upload Package Success",
+			Data: v,
+		}
+		c.Data["json"] = ret
 	} else {
-		c.Data["json"] = err.Error()
+		ret := models.Resp{
+			Code: 402,
+			Msg:  "Upload Package Success",
+			Data: err.Error(),
+		}
+		c.Data["json"] = ret
 	}
 	c.ServeJSON()
 }
@@ -50,17 +85,17 @@ func (c *PackageController) Post() {
 // @Success 200 {object} models.Package
 // @Failure 403 :id is empty
 // @router /:id [get]
-func (c *PackageController) GetOne() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
-	v, err := models.GetPackageById(id)
-	if err != nil {
-		c.Data["json"] = err.Error()
-	} else {
-		c.Data["json"] = v
-	}
-	c.ServeJSON()
-}
+//func (c *PackageController) GetOne() {
+//	idStr := c.Ctx.Input.Param(":id")
+//	id, _ := strconv.ParseInt(idStr, 0, 64)
+//	v, err := models.GetPackageById(id)
+//	if err != nil {
+//		c.Data["json"] = err.Error()
+//	} else {
+//		c.Data["json"] = v
+//	}
+//	c.ServeJSON()
+//}
 
 // GetAll ...
 // @Title Get All
@@ -133,18 +168,18 @@ func (c *PackageController) GetAll() {
 // @Success 200 {object} models.Package
 // @Failure 403 :id is not int
 // @router /:id [put]
-func (c *PackageController) Put() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
-	v := models.Package{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
-	if err := models.UpdatePackageById(&v); err == nil {
-		c.Data["json"] = "OK"
-	} else {
-		c.Data["json"] = err.Error()
-	}
-	c.ServeJSON()
-}
+//func (c *PackageController) Put() {
+//	idStr := c.Ctx.Input.Param(":id")
+//	id, _ := strconv.ParseInt(idStr, 0, 64)
+//	v := models.Package{Id: id}
+//	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+//	if err := models.UpdatePackageById(&v); err == nil {
+//		c.Data["json"] = "OK"
+//	} else {
+//		c.Data["json"] = err.Error()
+//	}
+//	c.ServeJSON()
+//}
 
 // Delete ...
 // @Title Delete
@@ -162,4 +197,11 @@ func (c *PackageController) Delete() {
 		c.Data["json"] = err.Error()
 	}
 	c.ServeJSON()
+}
+
+func getVersion(filename string)  string{
+	version_split := strings.Split(filename, ".")
+	version_split = version_split[1:len(version_split)-1]
+	version :=strings.Join(version_split,".")
+	return version
 }

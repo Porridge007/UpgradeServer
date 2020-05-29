@@ -20,11 +20,19 @@ func init() {
 				&controllers.DeviceController{},
 			),
 		),
+
+		beego.NSNamespace("/package",
+			beego.NSInclude(
+				&controllers.PackageController{},
+			),
+		),
+
 		beego.NSNamespace("/user",
 			beego.NSInclude(
 				&controllers.UserController{},
 			),
 		),
+
 	)
 	beego.AddNamespace(ns)
 }

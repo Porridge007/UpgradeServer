@@ -4,6 +4,8 @@ import (
 	"UpgraderServer/models"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -35,6 +37,10 @@ func (c *DeviceController) Post() {
 	var v models.Device
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	if _, err := models.AddDevice(&v); err == nil {
+		err:=os.Mkdir("./upload/"+v.Device,os.ModePerm)
+		if err!=nil{
+			fmt.Println(err)
+		}
 		c.Ctx.Output.SetStatus(201)
 		ret := models.Resp{
 			Code: 200,

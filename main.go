@@ -2,9 +2,8 @@ package main
 
 import (
 	_ "UpgraderServer/routers"
-	"github.com/astaxie/beego/orm"
-
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 	_ "github.com/mattn/go-sqlite3"
 )
 
