@@ -36,15 +36,6 @@ func init() {
 
     beego.GlobalControllerRouter["UpgraderServer/controllers:DeviceController"] = append(beego.GlobalControllerRouter["UpgraderServer/controllers:DeviceController"],
         beego.ControllerComments{
-            Method: "GetOne",
-            Router: `/getone/:id`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["UpgraderServer/controllers:DeviceController"] = append(beego.GlobalControllerRouter["UpgraderServer/controllers:DeviceController"],
-        beego.ControllerComments{
             Method: "GetAll",
             Router: `/list`,
             AllowHTTPMethods: []string{"get"},

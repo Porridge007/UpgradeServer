@@ -4,7 +4,6 @@ import (
 	"UpgraderServer/models"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -19,7 +18,7 @@ type DeviceController struct {
 // URLMapping ...
 func (c *DeviceController) URLMapping() {
 	c.Mapping("Post", c.Post)
-	c.Mapping("GetOne", c.GetOne)
+	//c.Mapping("GetOne", c.GetOne)
 	c.Mapping("GetAll", c.GetAll)
 	c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
@@ -61,20 +60,19 @@ func (c *DeviceController) Post() {
 // @Success 200 {object} models.Device
 // @Failure 403 :id is empty
 // @router /getone/:id [get]
-func (c *DeviceController) GetOne() {
-	idStr := c.Ctx.Input.Param(":id")
-	fmt.Println(idStr)
-	id, _ := strconv.ParseInt(idStr, 0, 64)
-	fmt.Println(id)
-	v, err := models.GetDeviceById(id)
-	if err != nil {
-		c.Data["json"] = err.Error()
-	} else {
-		c.Data["json"] = v
-	}
-	c.ServeJSON()
-}
-
+//func (c *DeviceController) GetOne() {
+//	idStr := c.Ctx.Input.Param(":id")
+//	fmt.Println(idStr)
+//	id, _ := strconv.ParseInt(idStr, 0, 64)
+//	fmt.Println(id)
+//	v, err := models.GetDeviceById(id)
+//	if err != nil {
+//		c.Data["json"] = err.Error()
+//	} else {
+//		c.Data["json"] = v
+//	}
+//	c.ServeJSON()
+//}
 
 // GetAll ...
 // @Title Get All
@@ -194,14 +192,14 @@ func (c *DeviceController) Delete() {
 		ret := models.Resp{
 			Code: 200,
 			Msg:  "Delete Device Success",
-			Data: "ok" ,
+			Data: "ok",
 		}
 		c.Data["json"] = ret
 	} else {
 		ret := models.Resp{
 			Code: 303,
 			Msg:  "Delete Device Failure",
-			Data: err.Error() ,
+			Data: err.Error(),
 		}
 		c.Data["json"] = ret
 	}
