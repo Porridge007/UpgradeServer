@@ -4,6 +4,7 @@ import (
 	"UpgraderServer/models"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -36,9 +37,19 @@ func (c *DeviceController) Post() {
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	if _, err := models.AddDevice(&v); err == nil {
 		c.Ctx.Output.SetStatus(201)
-		c.Data["json"] = v
+		ret := models.Resp{
+			Code: 200,
+			Msg:  "Add Device Success",
+			Data: v,
+		}
+		c.Data["json"] = ret
 	} else {
-		c.Data["json"] = err.Error()
+		ret := models.Resp{
+			Code: 302,
+			Msg:  "Add Device Success",
+			Data: err.Error(),
+		}
+		c.Data["json"] = ret
 	}
 	c.ServeJSON()
 }
@@ -49,10 +60,12 @@ func (c *DeviceController) Post() {
 // @Param	id		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.Device
 // @Failure 403 :id is empty
-// @router /:id [get]
+// @router /getone/:id [get]
 func (c *DeviceController) GetOne() {
 	idStr := c.Ctx.Input.Param(":id")
+	fmt.Println(idStr)
 	id, _ := strconv.ParseInt(idStr, 0, 64)
+	fmt.Println(id)
 	v, err := models.GetDeviceById(id)
 	if err != nil {
 		c.Data["json"] = err.Error()
@@ -61,6 +74,7 @@ func (c *DeviceController) GetOne() {
 	}
 	c.ServeJSON()
 }
+
 
 // GetAll ...
 // @Title Get All
@@ -73,7 +87,7 @@ func (c *DeviceController) GetOne() {
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
 // @Success 200 {object} models.Device
 // @Failure 403
-// @router / [get]
+// @router /list [get]
 func (c *DeviceController) GetAll() {
 	var fields []string
 	var sortby []string
@@ -118,9 +132,19 @@ func (c *DeviceController) GetAll() {
 
 	l, err := models.GetAllDevice(query, fields, sortby, order, offset, limit)
 	if err != nil {
-		c.Data["json"] = err.Error()
+		ret := models.Resp{
+			Code: 301,
+			Msg:  "Get Device failed",
+			Data: err.Error(),
+		}
+		c.Data["json"] = ret
 	} else {
-		c.Data["json"] = l
+		ret := models.Resp{
+			Code: 200,
+			Msg:  "Get Device success",
+			Data: l,
+		}
+		c.Data["json"] = ret
 	}
 	c.ServeJSON()
 }
@@ -139,9 +163,19 @@ func (c *DeviceController) Put() {
 	v := models.Device{Id: id}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	if err := models.UpdateDeviceById(&v); err == nil {
-		c.Data["json"] = "OK"
+		ret := models.Resp{
+			Code: 200,
+			Msg:  "Update Device Failed",
+			Data: "ok",
+		}
+		c.Data["json"] = ret
 	} else {
-		c.Data["json"] = err.Error()
+		ret := models.Resp{
+			Code: 304,
+			Msg:  "Update Device Failed",
+			Data: err.Error(),
+		}
+		c.Data["json"] = ret
 	}
 	c.ServeJSON()
 }
@@ -157,9 +191,19 @@ func (c *DeviceController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.ParseInt(idStr, 0, 64)
 	if err := models.DeleteDevice(id); err == nil {
-		c.Data["json"] = "OK"
+		ret := models.Resp{
+			Code: 200,
+			Msg:  "Delete Device Success",
+			Data: "ok" ,
+		}
+		c.Data["json"] = ret
 	} else {
-		c.Data["json"] = err.Error()
+		ret := models.Resp{
+			Code: 303,
+			Msg:  "Delete Device Failure",
+			Data: err.Error() ,
+		}
+		c.Data["json"] = ret
 	}
 	c.ServeJSON()
 }
