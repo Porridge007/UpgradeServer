@@ -13,6 +13,7 @@ type Device struct {
 	Id      int64
 	Device  string `orm:"size(128)"`
 	Comment string `orm:"size(128)"`
+	Latest string `orm:"size(128)"`
 }
 
 func init() {

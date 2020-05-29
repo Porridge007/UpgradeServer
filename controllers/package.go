@@ -3,6 +3,7 @@ package controllers
 import (
 	"UpgraderServer/models"
 	"errors"
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"log"
@@ -60,6 +61,7 @@ func (c *PackageController) Post() {
 	v.Version = getVersion(v.Name)
 	v.Address =path
 	if _, err := models.AddPackage(&v); err == nil {
+		updateLastestField(deviceId,v.Version)
 		c.Ctx.Output.SetStatus(201)
 		ret := models.Resp{
 			Code: 200,
@@ -204,4 +206,15 @@ func getVersion(filename string)  string{
 	version_split = version_split[1:len(version_split)-1]
 	version :=strings.Join(version_split,".")
 	return version
+}
+
+func updateLastestField(deviceId int64, latestVersion string)  {
+	o := orm.NewOrm()
+	device := models.Device{Id:deviceId}
+	if o.Read(&device) == nil {
+		device.Latest = latestVersion
+		if num, err := o.Update(&device); err == nil {
+			fmt.Println(num)
+		}
+	}
 }
