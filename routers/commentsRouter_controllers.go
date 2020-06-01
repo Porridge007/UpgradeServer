@@ -64,8 +64,8 @@ func init() {
     beego.GlobalControllerRouter["UpgraderServer/controllers:PackageController"] = append(beego.GlobalControllerRouter["UpgraderServer/controllers:PackageController"],
         beego.ControllerComments{
             Method: "Delete",
-            Router: `/:id`,
-            AllowHTTPMethods: []string{"delete"},
+            Router: `/delete`,
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

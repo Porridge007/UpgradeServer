@@ -2,12 +2,13 @@ package controllers
 
 import (
 	"UpgraderServer/models"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"log"
-	"strconv"
+	"os"
 	"strings"
 )
 
@@ -37,7 +38,6 @@ func (c *PackageController) Post() {
 	deviceId, _ :=  c.GetInt64("device")
 	var  device models.Device
 	_ =  orm.NewOrm().QueryTable("device").Filter("id", deviceId).One(&device)
-	v.Device = device.Device
 
 	f, h, err := c.GetFile("file")
 	if err != nil {
@@ -59,7 +59,8 @@ func (c *PackageController) Post() {
 	}
 	v.Name = h.Filename
 	v.Version = getVersion(v.Name)
-	v.Address =path
+	v.Device = device.Device
+	v.Address = beego.AppConfig.String("HostIP") +"/download/"+v.Name
 	if _, err := models.AddPackage(&v); err == nil {
 		updateLastestField(deviceId,v.Version)
 		c.Ctx.Output.SetStatus(201)
@@ -72,7 +73,7 @@ func (c *PackageController) Post() {
 	} else {
 		ret := models.Resp{
 			Code: 402,
-			Msg:  "Upload Package Success",
+			Msg:  "Upload Package Failure",
 			Data: err.Error(),
 		}
 		c.Data["json"] = ret
@@ -119,6 +120,10 @@ func (c *PackageController) GetAll() {
 	var limit int64 = 10
 	var offset int64
 
+	deviceId, _ :=  c.GetInt64("device")
+	var  device models.Device
+	_ =  orm.NewOrm().QueryTable("device").Filter("id", deviceId).One(&device)
+
 	// fields: col1,col2,entity.col3
 	if v := c.GetString("fields"); v != "" {
 		fields = strings.Split(v, ",")
@@ -153,11 +158,21 @@ func (c *PackageController) GetAll() {
 		}
 	}
 
-	l, err := models.GetAllPackage(query, fields, sortby, order, offset, limit)
+	l, err := models.GetAllPackage(query, fields, sortby, order, offset, limit, device.Device)
 	if err != nil {
-		c.Data["json"] = err.Error()
+		ret := models.Resp{
+			Code: 403,
+			Msg:  "Get Package List Failure",
+			Data: err.Error(),
+		}
+		c.Data["json"] = ret
 	} else {
-		c.Data["json"] = l
+		ret := models.Resp{
+			Code: 200,
+			Msg:  "Get Package List Success",
+			Data: l,
+		}
+		c.Data["json"] = ret
 	}
 	c.ServeJSON()
 }
@@ -189,15 +204,36 @@ func (c *PackageController) GetAll() {
 // @Param	id		path 	string	true		"The id you want to delete"
 // @Success 200 {string} delete success!
 // @Failure 403 id is empty
-// @router /:id [delete]
+// @router /delete [post]
 func (c *PackageController) Delete() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.ParseInt(idStr, 0, 64)
-	if err := models.DeletePackage(id); err == nil {
-		c.Data["json"] = "OK"
-	} else {
-		c.Data["json"] = err.Error()
+	var toDelete []int64
+	json.Unmarshal(c.Ctx.Input.RequestBody, &toDelete)
+	var undeleted []int64
+	for  _,id := range toDelete {
+		var pack models.Package
+		orm.NewOrm().QueryTable("package").Filter("id", id).One(&pack)
+		if err := models.DeletePackage(int64(id));
+			err != nil {
+			undeleted = append(undeleted, id)
+		}
+		os.Remove("upload/"+pack.Name)
 	}
+
+		if undeleted == nil {
+			ret := models.Resp{
+				Code: 200,
+				Msg:  "Delete Package Success",
+				Data: "OK",
+			}
+			c.Data["json"] = ret
+		} else {
+			ret := models.Resp{
+				Code: 404,
+				Msg:  "Delete Package Failure",
+				Data: undeleted,
+			}
+			c.Data["json"] = ret
+		}
 	c.ServeJSON()
 }
 

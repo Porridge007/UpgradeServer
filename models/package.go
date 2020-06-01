@@ -43,9 +43,9 @@ func GetPackageById(id int64) (v *Package, err error) {
 // GetAllPackage retrieves all Package matches certain condition. Returns empty list if
 // no records exist
 func GetAllPackage(query map[string]string, fields []string, sortby []string, order []string,
-	offset int64, limit int64) (ml []interface{}, err error) {
+	offset int64, limit int64, device string) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(Package))
+	qs := o.QueryTable(new(Package)).Filter("Device", device)
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
