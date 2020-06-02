@@ -14,6 +14,7 @@ import (
 )
 
 func init() {
+	beego.Router("/",&controllers.IndexController{})
 	ns := beego.NewNamespace("/upgrade",
 		beego.NSNamespace("/device",
 			beego.NSInclude(
@@ -32,7 +33,6 @@ func init() {
 				&controllers.UserController{},
 			),
 		),
-
 	)
 	beego.AddNamespace(ns)
 }

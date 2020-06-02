@@ -3,8 +3,6 @@ package controllers
 import (
 	"UpgraderServer/models"
 	"encoding/json"
-	"fmt"
-
 	"github.com/astaxie/beego"
 )
 
@@ -68,7 +66,6 @@ func (u *UserController) Put() {
 	if uid != "" {
 		var user models.User
 		json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-		fmt.Println(user.Password, user.Username)
 		uu, err := models.UpdateUser(uid, &user)
 		beego.AppConfig.Set("username", user.Username)
 		beego.AppConfig.Set("password", user.Password)

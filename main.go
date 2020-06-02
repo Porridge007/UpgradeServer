@@ -19,6 +19,7 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
+	beego.BConfig.WebConfig.StaticDir["/static"] = "static"
 	beego.SetStaticPath("/download", "upload")
 	beego.Run()
 }
