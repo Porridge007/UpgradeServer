@@ -16,6 +16,8 @@ import (
 func init() {
 	beego.Router("/query_latest", &controllers.QueryLatestController{})
 	beego.Router("/",&controllers.IndexController{})
+	beego.Router("/update_latest", &controllers.UpdateLatestController{})
+	beego.Router("/update_given", &controllers.UpdateGivenController{})
 	ns := beego.NewNamespace("/upgrade",
 		beego.NSNamespace("/device",
 			beego.NSInclude(
