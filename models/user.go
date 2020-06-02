@@ -2,7 +2,7 @@ package models
 
 import (
 	"errors"
-	"github.com/astaxie/beego/orm"
+	"github.com/astaxie/beego"
 	"strconv"
 	"time"
 )
@@ -13,9 +13,8 @@ var (
 
 func init() {
 	UserList = make(map[string]*User)
-	u := User{"user_11111", "admin", "123456"}
-	UserList["user_11111"] = &u
-	orm.RegisterModel(new(User))
+	u := User{"0", beego.AppConfig.String("username"), beego.AppConfig.String("password")}
+	UserList["0"] = &u
 }
 
 type User struct {

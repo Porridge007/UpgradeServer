@@ -3,6 +3,7 @@ package controllers
 import (
 	"UpgraderServer/models"
 	"encoding/json"
+	"fmt"
 
 	"github.com/astaxie/beego"
 )
@@ -67,11 +68,25 @@ func (u *UserController) Put() {
 	if uid != "" {
 		var user models.User
 		json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+		fmt.Println(user.Password, user.Username)
 		uu, err := models.UpdateUser(uid, &user)
+		beego.AppConfig.Set("username", user.Username)
+		beego.AppConfig.Set("password", user.Password)
+		beego.AppConfig.SaveConfigFile("conf/app.conf")
 		if err != nil {
-			u.Data["json"] = err.Error()
+			ret := models.Resp{
+				Code: 501,
+				Msg:  "Modify User Failure",
+				Data:  err.Error(),
+			}
+			u.Data["json"] = ret
 		} else {
-			u.Data["json"] = uu
+			ret := models.Resp{
+				Code: 200,
+				Msg:  "Modify User Success",
+				Data:  uu,
+			}
+			u.Data["json"] = ret
 		}
 	}
 	u.ServeJSON()
@@ -101,9 +116,19 @@ func (u *UserController) Login() {
 	username := u.GetString("username")
 	password := u.GetString("password")
 	if models.Login(username, password) {
-		u.Data["json"] = "login success"
+		ret := models.Resp{
+			Code: 200,
+			Msg:  "Login Success",
+			Data:  "login success",
+		}
+		u.Data["json"] = ret
 	} else {
-		u.Data["json"] = "user not exist"
+		ret := models.Resp{
+			Code: 502,
+			Msg:  "Login Success",
+			Data:  "user not exist",
+		}
+		u.Data["json"] = ret
 	}
 	u.ServeJSON()
 }
@@ -113,7 +138,12 @@ func (u *UserController) Login() {
 // @Success 200 {string} logout success
 // @router /logout [get]
 func (u *UserController) Logout() {
-	u.Data["json"] = "logout success"
+	ret := models.Resp{
+		Code: 200,
+		Msg:  "Login Success",
+		Data:  "logout success",
+	}
+	u.Data["json"] = ret
 	u.ServeJSON()
 }
 

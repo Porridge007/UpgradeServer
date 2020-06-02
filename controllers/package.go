@@ -34,10 +34,11 @@ func (c *PackageController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *PackageController) Post() {
+	os.Mkdir("upload",os.ModePerm)
 	var v models.Package
 	deviceId, _ :=  c.GetInt64("device")
-	var  device models.Device
-	_ =  orm.NewOrm().QueryTable("device").Filter("id", deviceId).One(&device)
+	//var  device models.Device
+	//_ =  orm.NewOrm().QueryTable("device").Filter("id", deviceId).One(&device)
 
 	f, h, err := c.GetFile("file")
 	if err != nil {
@@ -59,7 +60,7 @@ func (c *PackageController) Post() {
 	}
 	v.Name = h.Filename
 	v.Version = getVersion(v.Name)
-	v.Device = device.Device
+	v.Device = deviceId
 	v.Address = beego.AppConfig.String("HostIP") +"/download/"+v.Name
 	if _, err := models.AddPackage(&v); err == nil {
 		updateLastestField(deviceId,v.Version)
@@ -121,9 +122,6 @@ func (c *PackageController) GetAll() {
 	var offset int64
 
 	deviceId, _ :=  c.GetInt64("device")
-	var  device models.Device
-	_ =  orm.NewOrm().QueryTable("device").Filter("id", deviceId).One(&device)
-
 	// fields: col1,col2,entity.col3
 	if v := c.GetString("fields"); v != "" {
 		fields = strings.Split(v, ",")
@@ -158,7 +156,7 @@ func (c *PackageController) GetAll() {
 		}
 	}
 
-	l, err := models.GetAllPackage(query, fields, sortby, order, offset, limit, device.Device)
+	l, err := models.GetAllPackage(query, fields, sortby, order, offset, limit, deviceId)
 	if err != nil {
 		ret := models.Resp{
 			Code: 403,

@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 
@@ -133,6 +134,16 @@ func UpdateDeviceById(m *Device) (err error) {
 func DeleteDevice(id int64) (err error) {
 	o := orm.NewOrm()
 	v := Device{Id: id}
+	var packageNames []Package
+	o.QueryTable("package").Filter("device", id).All(&packageNames, "name")
+	for _, name := range(packageNames){
+		fmt.Println("upload/"+name.Name)
+		os.Remove("upload/"+name.Name)
+	}
+
+	if _, err = o.Delete(&Package{Device: id}); err == nil {
+		fmt.Println("Packages in DB has been cleaned")
+	}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
