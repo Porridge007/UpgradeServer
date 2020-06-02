@@ -34,9 +34,9 @@ func (c *PackageController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *PackageController) Post() {
-	os.Mkdir("upload",os.ModePerm)
+	os.Mkdir("upload", os.ModePerm)
 	var v models.Package
-	deviceId, _ :=  c.GetInt64("device")
+	deviceId, _ := c.GetInt64("device")
 	//var  device models.Device
 	//_ =  orm.NewOrm().QueryTable("device").Filter("id", deviceId).One(&device)
 
@@ -45,25 +45,25 @@ func (c *PackageController) Post() {
 		log.Fatal("getfile err ", err)
 	}
 	defer f.Close()
-	path :=  "upload/"+ h.Filename
+	path := "upload/" + h.Filename
 
 	err = c.SaveToFile("file", path)
-	if  err != nil{
+	if err != nil {
 		ret := models.Resp{
 			Code: 401,
 			Msg:  "Save Package Failure",
 			Data: err.Error(),
 		}
-		c.Data["json"] =  ret
+		c.Data["json"] = ret
 		c.ServeJSON()
 		return
 	}
 	v.Name = h.Filename
 	v.Version = getVersion(v.Name)
 	v.Device = deviceId
-	v.Address = strings.Split(c.Ctx.Request.RemoteAddr,":")[0]+ beego.AppConfig.String("httpport") +"/download/"+v.Name
+	v.Address = strings.Split(c.Ctx.Request.RemoteAddr, ":")[0] + ":" + beego.AppConfig.String("httpport") + "/download/" + v.Name
 	if _, err := models.AddPackage(&v); err == nil {
-		updateLastestField(deviceId,v.Version)
+		updateLastestField(deviceId, v.Version)
 		c.Ctx.Output.SetStatus(201)
 		ret := models.Resp{
 			Code: 200,
@@ -121,7 +121,7 @@ func (c *PackageController) GetAll() {
 	var limit int64 = 10
 	var offset int64
 
-	deviceId, _ :=  c.GetInt64("device")
+	deviceId, _ := c.GetInt64("device")
 	// fields: col1,col2,entity.col3
 	if v := c.GetString("fields"); v != "" {
 		fields = strings.Split(v, ",")
@@ -207,44 +207,44 @@ func (c *PackageController) Delete() {
 	var toDelete []int64
 	json.Unmarshal(c.Ctx.Input.RequestBody, &toDelete)
 	var undeleted []int64
-	for  _,id := range toDelete {
+	for _, id := range toDelete {
 		var pack models.Package
 		orm.NewOrm().QueryTable("package").Filter("id", id).One(&pack)
 		if err := models.DeletePackage(int64(id));
 			err != nil {
 			undeleted = append(undeleted, id)
 		}
-		os.Remove("upload/"+pack.Name)
+		os.Remove("upload/" + pack.Name)
 	}
 
-		if undeleted == nil {
-			ret := models.Resp{
-				Code: 200,
-				Msg:  "Delete Package Success",
-				Data: "OK",
-			}
-			c.Data["json"] = ret
-		} else {
-			ret := models.Resp{
-				Code: 404,
-				Msg:  "Delete Package Failure",
-				Data: undeleted,
-			}
-			c.Data["json"] = ret
+	if undeleted == nil {
+		ret := models.Resp{
+			Code: 200,
+			Msg:  "Delete Package Success",
+			Data: "OK",
 		}
+		c.Data["json"] = ret
+	} else {
+		ret := models.Resp{
+			Code: 404,
+			Msg:  "Delete Package Failure",
+			Data: undeleted,
+		}
+		c.Data["json"] = ret
+	}
 	c.ServeJSON()
 }
 
-func getVersion(filename string)  string{
+func getVersion(filename string) string {
 	version_split := strings.Split(filename, ".")
-	version_split = version_split[1:len(version_split)-1]
-	version :=strings.Join(version_split,".")
+	version_split = version_split[1 : len(version_split)-1]
+	version := strings.Join(version_split, ".")
 	return version
 }
 
-func updateLastestField(deviceId int64, latestVersion string)  {
+func updateLastestField(deviceId int64, latestVersion string) {
 	o := orm.NewOrm()
-	device := models.Device{Id:deviceId}
+	device := models.Device{Id: deviceId}
 	if o.Read(&device) == nil {
 		device.Latest = latestVersion
 		if num, err := o.Update(&device); err == nil {
