@@ -14,6 +14,7 @@ import (
 )
 
 func init() {
+	beego.Router("/query_latest", &controllers.QueryLatestController{})
 	beego.Router("/",&controllers.IndexController{})
 	ns := beego.NewNamespace("/upgrade",
 		beego.NSNamespace("/device",
