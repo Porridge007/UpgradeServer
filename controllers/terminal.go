@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"UpgraderServer/models"
-	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -47,25 +46,8 @@ func (c *QueryLatestController) Get(){
 
 	o.QueryTable("device").Filter("device", deviceName).One(&device)
 	o.QueryTable("package").Filter("device", device.Id).OrderBy("-id").One(&pack)
-	file := File{
-		Id:        pack.Id,
-		File_sha1: "",
-		File_name: pack.Name,
-		File_size: 0,
-		File_addr: pack.Address,
-		Created:   time.Time{},
-		Updated:   time.Time{},
-		Status:    0,
-		Device:    deviceName,
-		Version:   pack.Version,
-	}
-	data, err := json.Marshal(file)
-	if err != nil {
-		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	c.Ctx.ResponseWriter.Write(data)
 
+	c.Ctx.ResponseWriter.Write([]byte(pack.Version))
 }
 
 func (c *UpdateLatestController) Post() {
