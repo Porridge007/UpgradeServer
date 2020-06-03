@@ -61,7 +61,7 @@ func (c *PackageController) Post() {
 	v.Name = h.Filename
 	v.Version = getVersion(v.Name)
 	v.Device = deviceId
-	v.Address = strings.Split(c.Ctx.Request.RemoteAddr, ":")[0] + ":" + beego.AppConfig.String("httpport") + "/download/" + v.Name
+	v.Address = SeverAddr() + "/download/" + v.Name
 	if _, err := models.AddPackage(&v); err == nil {
 		updateLastestField(deviceId, v.Version)
 		c.Ctx.Output.SetStatus(201)
