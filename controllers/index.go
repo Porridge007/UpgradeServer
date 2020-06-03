@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 )
 
@@ -10,7 +9,6 @@ type IndexController struct {
 }
 
 func (c *IndexController) Get() {
-	fmt.Println(c.Ctx.Request.RemoteAddr)
 	c.TplName ="index.html"
 	_ = c.Render()
 }
