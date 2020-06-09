@@ -4,6 +4,7 @@ import (
 	"UpgraderServer/models"
 	"encoding/json"
 	"errors"
+	"github.com/astaxie/beego/orm"
 	"strconv"
 	"strings"
 
@@ -160,6 +161,10 @@ func (c *DeviceController) Put() {
 	id, _ := strconv.ParseInt(idStr, 0, 64)
 	v := models.Device{Id: id}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+	var pack models.Package
+	o := orm.NewOrm()
+	o.QueryTable("package").Filter("device", v.Id).OrderBy("-id").One(&pack)
+	v.Latest =  pack.Version
 	if err := models.UpdateDeviceById(&v); err == nil {
 		ret := models.Resp{
 			Code: 200,
