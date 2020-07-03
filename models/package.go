@@ -14,6 +14,7 @@ type Package struct {
 	Name    string `orm:"size(128)"`
 	Address string `orm:"size(128)"`
 	Device  int64
+	Detail string `orm:"size(1024)"`
 	Version string `orm:"size(128)"`
 }
 

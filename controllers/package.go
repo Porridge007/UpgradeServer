@@ -37,6 +37,7 @@ func (c *PackageController) Post() {
 	os.Mkdir("upload", os.ModePerm)
 	var v models.Package
 	deviceId, _ := c.GetInt64("device")
+	detail := c.GetString("detail")
 	//var  device models.Device
 	//_ =  orm.NewOrm().QueryTable("device").Filter("id", deviceId).One(&device)
 
@@ -62,6 +63,7 @@ func (c *PackageController) Post() {
 	v.Version = getVersion(v.Name)
 	v.Device = deviceId
 	v.Address = SeverAddr() + "/download/" + v.Name
+	v.Detail = detail
 	if _, err := models.AddPackage(&v); err == nil {
 		updateLastestField(deviceId, v.Version)
 		c.Ctx.Output.SetStatus(201)
