@@ -66,6 +66,7 @@ func (u *UserController) Put() {
 	if uid != "" {
 		var user models.User
 		json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+
 		uu, err := models.UpdateUser(uid, &user)
 		if user.Username == "admin" {
 			beego.AppConfig.Set("username", user.Username)
