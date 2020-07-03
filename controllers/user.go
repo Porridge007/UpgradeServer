@@ -67,8 +67,13 @@ func (u *UserController) Put() {
 		var user models.User
 		json.Unmarshal(u.Ctx.Input.RequestBody, &user)
 		uu, err := models.UpdateUser(uid, &user)
-		beego.AppConfig.Set("username", user.Username)
-		beego.AppConfig.Set("password", user.Password)
+		if user.Username == "admin" {
+			beego.AppConfig.Set("username", user.Username)
+			beego.AppConfig.Set("password", user.Password)
+		}else if user.Username == "guest"{
+			beego.AppConfig.Set("guest_name", user.Username)
+			beego.AppConfig.Set("guest_password", user.Password)
+		}
 		beego.AppConfig.SaveConfigFile("conf/app.conf")
 		if err != nil {
 			ret := models.Resp{
@@ -112,7 +117,9 @@ func (u *UserController) Delete() {
 func (u *UserController) Login() {
 	username := u.GetString("username")
 	password := u.GetString("password")
-	if models.Login(username, password) {
+	//guest_name :=  u.GetString("guest_name")
+	//guest_password := u.GetString("guest_password")
+	if models.Login(username, password){
 		ret := models.Resp{
 			Code: 200,
 			Msg:  "Login Success",

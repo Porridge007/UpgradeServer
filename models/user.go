@@ -14,7 +14,9 @@ var (
 func init() {
 	UserList = make(map[string]*User)
 	u := User{"0", beego.AppConfig.String("username"), beego.AppConfig.String("password")}
+	guest := User{"1", beego.AppConfig.String("guest_name"), beego.AppConfig.String("guest_password")}
 	UserList["0"] = &u
+	UserList["1"] = &guest
 }
 
 type User struct {
@@ -55,7 +57,7 @@ func UpdateUser(uid string, uu *User) (a *User, err error) {
 
 func Login(username, password string) bool {
 	for _, u := range UserList {
-		if u.Username == username && u.Password == password {
+		if u.Username == username && u.Password == password{
 			return true
 		}
 	}
