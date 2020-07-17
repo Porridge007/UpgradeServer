@@ -64,15 +64,27 @@ func (c *PackageController) Post() {
 	v.Device = deviceId
 	v.Address = SeverAddr() + "/download/" + v.Name
 	v.Detail = detail
-	if _, err := models.AddPackage(&v); err == nil {
-		updateLastestField(deviceId, v.Version)
-		c.Ctx.Output.SetStatus(201)
-		ret := models.Resp{
-			Code: 200,
-			Msg:  "Upload Package Success",
-			Data: v,
+
+	if ok, _ := PathExists(path); ok {
+
+		if _, err := models.AddPackage(&v); err == nil {
+			updateLastestField(deviceId, v.Version)
+			c.Ctx.Output.SetStatus(201)
+			ret := models.Resp{
+				Code: 200,
+				Msg:  "Upload Package Success",
+				Data: v,
+			}
+			c.Data["json"] = ret
+		} else {
+			ret := models.Resp{
+				Code: 402,
+				Msg:  "Upload Package Failure",
+				Data: err.Error(),
+			}
+			c.Data["json"] = ret
 		}
-		c.Data["json"] = ret
+
 	} else {
 		ret := models.Resp{
 			Code: 402,
@@ -253,4 +265,15 @@ func updateLastestField(deviceId int64, latestVersion string) {
 			fmt.Println(num)
 		}
 	}
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }
